@@ -3,12 +3,16 @@
 <h6 align=center>MyFordMobile reverse-engineered API in Python</h6>
 
 
-## Endpoints
+## Functions
+
+### `FordAPI`
 
 | Endpoint | Detected | Prototyped | Complete |
 |----------|----------|------------|----------|
 | `authenticate` | 🐳 | | |
 | `get_vehicles` | | 🐳 | |
+| `select_vehicle` | | 🐳 | |
+| `start_engine` | | 🐳 | |
 
 
 
