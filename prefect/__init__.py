@@ -120,3 +120,50 @@ class FordAPI:
         }
         res = self.post(self.url("services/webRemoteEnergyReportPS"), params)
         return res.json()["getAllVehiclesResponse"]
+
+    def select_vehicle(self, vin: str) -> bool:
+        """
+        Select a vehicle to be used in this session.
+
+        Arguments:
+            vin (str): The VIN of this vehicle
+
+        Returns:
+            bool: Whether the selection was successful
+
+        """
+        params = {
+            "PARAMS": {
+                "VIN", str,
+                "SESSIONID", self._token,
+                "apiLevel", "1",
+            }
+        }
+        res = self.post(self.url("services/webSetActiveVehiclePS"), params)
+        return 'error' not in res.json()
+
+    def start_engine(self) -> None:
+        """
+        Start the engine of the currently selected vehicle.
+
+        Arguments:
+            None
+
+        Returns:
+            TODO
+
+        """
+        params = {
+            "PARAMS": {
+                "LOOKUPCODE", "START_CMD",
+                "SESSIONID", self._token,
+                "apiLevel", "1",
+            }
+        }
+        res = self.post(self.url("services/webAddCommandPS"), params)
+        result = res.json()
+        if "error" in result:
+            raise ValueError("Authentication failed.", result["error"])
+        if "status" in result and "400" in result["status"]:
+            raise ValueError("Failure from server.", result)
+        return result
