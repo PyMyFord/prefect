@@ -119,6 +119,34 @@ class Vehicle:
         self._fordAPI.select_vehicle(self.vin)
         return self._fordAPI.cancel_start_engine()
 
+    def unlock(self):
+        """
+        Unlock this vehicle's doors.
+
+        Arguments:
+            None
+
+        Returns:
+            dict: Metadata about the job and its status.
+
+        """
+        self._fordAPI.select_vehicle(self.vin)
+        return self._fordAPI.unlock()
+
+    def lock(self):
+        """
+        Lock this vehicle's doors.
+
+        Arguments:
+            None
+
+        Returns:
+            dict: Metadata about the job and its status.
+
+        """
+        self._fordAPI.select_vehicle(self.vin)
+        return self._fordAPI.lock()
+
     def get_status(self):
         """
         Get the status of this vehicle, including odometry and fuel levels.
