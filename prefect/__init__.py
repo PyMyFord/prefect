@@ -5,12 +5,144 @@ flavored artifacts.
 """
 
 from typing import List
+import os
+import json
+
 import requests
+
+_BEARER_TOKEN = "b7bdf3f01761660c87a6b3b21afb898a"
+
+
+class Vehicle:
+    """
+    High-level API for interacting with a vehicle.
+
+    You could foreseeably only interact with your car through this API once you
+    have authenticated with the FordAPI service.
+    """
+
+    def __init__(self, fordAPI: 'FordAPI' = None) -> None:
+        """
+        Create a new Vehicle for data management.
+
+        This doesn't really make sense to use on its own.
+
+        Arguments:
+            fordAPI (FordAPI): The low-level API to use to back this Vehicle
+
+        Returns:
+            None
+
+        """
+        self._fordAPI = fordAPI
+
+    @staticmethod
+    def from_dict(data: dict, fordAPI: 'FordAPI') -> 'Vehicle':
+        """
+        Create a new vehicle from a data dictionary returned by the Ford API.
+
+        Arguments:
+            fordAPI (FordAPI): The low-level API to use to back this Vehicle
+
+        Returns:
+            Vehicle: The vehicle object with data populated
+
+        """
+        v = Vehicle(fordAPI=fordAPI)
+        v._data = data
+        v.location = (float(data["LATITUDE"]), float(data["LONGITUDE"]))
+        v.odometer = float(data["ODOMETER"])
+        v._ev_dte = data.get("ELECTRICDTE", 0)
+        v._fuel_dte = float(data.get("FUELDTE", 0))
+        v._dte = float(data.get("OVERALLDTE", 0))
+        v._vehicle_type = data["MODELNAME"]
+        v._vehicle_year = data["MODELYEAR"]
+        v.vin = data["vin"]
+        v.nickname = data["vehiclenickname"]
+        v._fuel_level = float(data["fuelLevel"])
+        v._state_of_charge = data.get("stateOfCharge")
+        v._charge_status = data.get("chargeStatus")
+        v._plug_status = data.get("plugStatus")
+        return v
+
+    def __repr__(self) -> str:
+        """
+        Produce a string representation of the vehicle.
+
+        For use with debugging, or, for example, str(Vehicle).
+        """
+        return f"<'{self.nickname}' {self._vehicle_year} {self._vehicle_type}>"
+
+    def start_engine(self):
+        """
+        Start the Vehicle's engine.
+
+        Note that calls to this service are NOT parallelizable! This is because
+        the Ford API sets a session variable depending upon which vehicle is
+        marked as "active." If you run too many of this function in a short
+        time-span, you will choke the server and it will forget which car you
+        are talking about. This is not an issue for most users, and will not
+        affect you if you only have one car registered in your account.
+
+        Arguments:
+            None
+
+        Returns:
+            dict: Metadata about the job and its status. Probably not useful
+                to you unless you're doing something funky with the Ford API.
+
+        """
+        self._fordAPI.select_vehicle(self.vin)
+        return self._fordAPI.start_engine()
+
+    def stop_engine(self):
+        """
+        Cancel a remote-start of the Vehicle's engine.
+
+        Note that calls to this service are NOT parallelizable! This is because
+        the Ford API sets a session variable depending upon which vehicle is
+        marked as "active." If you run too many of this function in a short
+        time-span, you will choke the server and it will forget which car you
+        are talking about. This is not an issue for most users, and will not
+        affect you if you only have one car registered in your account.
+
+        This is only relevant if you have already called Vehicle#start_engine.
+
+        Arguments:
+            None
+
+        Returns:
+            dict: Metadata about the job and its status. Probably not useful
+                to you unless you're doing something funky with the Ford API.
+
+        """
+        self._fordAPI.select_vehicle(self.vin)
+        return self._fordAPI.cancel_start_engine()
+
+    def get_status(self):
+        """
+        Get the status of this vehicle, including odometry and fuel levels.
+
+        You can pass the results of this function call to a Vehicle.from_dict
+        call in order to recreate a new copy of this Vehicle with updated info.
+
+        Arguments:
+            None
+
+        Returns:
+            dict: A metadata dictionary with information about this vehicle.
+
+        """
+        return [
+            v
+            for v in self._fordAPI.get_vehicles()
+            if v.vin == self.vin
+        ][0]._data
 
 
 class FordAPI:
     """
-    High-level class for interacting with the MyFordMobile API.
+    Low-level class for interacting with the MyFordMobile API.
 
     Authentication is handled separately so that a FordAPI object can be
     instantiated without having to deal with authentication at creationtime.
@@ -63,12 +195,13 @@ class FordAPI:
             url,
             headers={
                 "Content-Type": "application/json",
-                "Accept": "application/json"
+                "Accept": "application/json, text/javascript, */*",
+                "Authorization": f"Bearer {_BEARER_TOKEN}",
             },
             json=data
         )
 
-    def authenticate(self, username: str, password: str) -> None:
+    def authenticate(self, username: str = "~/.config/myfordmobile.json", password: str = None) -> None:
         """
         Perform a server authentication.
 
@@ -84,26 +217,32 @@ class FordAPI:
             None
 
         """
+        if password is None:
+            try:
+                with open(os.path.expanduser(username), 'r') as fh:
+                    config = json.load(fh)
+                    username = config['username']
+                    password = config['password']
+            except:
+                raise ValueError(
+                    "Failed to authenticate. You must provide a username and "
+                    "a password, or you can provide a path to a config file "
+                    "(~/.config/myfordmobile.json)."
+                )
         params = {
             "PARAMS": {
                 "emailaddress": username,
                 "password": password,
-                "persistent": "1",
-                "apiLevel": "1",
+                "persistent": "0",
+                "apiLevel": "2",
             }
         }
         res = self.post(self.url("services/webLoginPS"), params)
+        self._token = res.json()["response"]["authToken"]
 
-        # TODO: We should get back a token in here???
-        # Set this._token.
-        # TODO: Returning for debug only.
-        return res
-
-    def get_vehicles(self) -> List[dict]:
+    def get_vehicles(self) -> List['Vehicle']:
         """
         Get a list of all registered vehicles for this account.
-
-        TODO: Return List[Vehicle] instead of List[dict]
 
         Arguments:
             None
@@ -115,11 +254,16 @@ class FordAPI:
         params = {
             "PARAMS": {
                 "SESSIONID": self._token,
-                "apiLevel": "1",
+                "apiLevel": "2",
             }
         }
         res = self.post(self.url("services/webRemoteEnergyReportPS"), params)
-        return res.json()["getAllVehiclesResponse"]
+        if "response" not in res.json():
+            raise ValueError("Failed to fetch results:", res.text)
+        response = res.json()["response"]
+        if isinstance(response, dict):
+            response = [response, ]
+        return [Vehicle.from_dict(r, self) for r in response]
 
     def select_vehicle(self, vin: str) -> bool:
         """
@@ -134,9 +278,9 @@ class FordAPI:
         """
         params = {
             "PARAMS": {
-                "VIN", str,
-                "SESSIONID", self._token,
-                "apiLevel", "1",
+                "VIN": vin,
+                "SESSIONID": self._token,
+                "apiLevel": "2",
             }
         }
         res = self.post(self.url("services/webSetActiveVehiclePS"), params)
@@ -155,9 +299,35 @@ class FordAPI:
         """
         params = {
             "PARAMS": {
-                "LOOKUPCODE", "START_CMD",
-                "SESSIONID", self._token,
-                "apiLevel", "1",
+                "LOOKUPCODE": "START_CMD",
+                "SESSIONID": self._token,
+                "apiLevel": "2",
+            }
+        }
+        res = self.post(self.url("services/webAddCommandPS"), params)
+        result = res.json()
+        if "error" in result:
+            raise ValueError("Authentication failed.", result["error"])
+        if "status" in result and "400" in result["status"]:
+            raise ValueError("Failure from server.", result)
+        return result
+
+    def cancel_start_engine(self) -> None:
+        """
+        Start the engine of the currently selected vehicle.
+
+        Arguments:
+            None
+
+        Returns:
+            TODO
+
+        """
+        params = {
+            "PARAMS": {
+                "LOOKUPCODE": "CANCEL_START_CMD",
+                "SESSIONID": self._token,
+                "apiLevel": "2",
             }
         }
         res = self.post(self.url("services/webAddCommandPS"), params)
