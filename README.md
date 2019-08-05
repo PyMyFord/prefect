@@ -3,7 +3,6 @@
 <h6 align=center>MyFordMobile reverse-engineered API in Python</h6>
 
 
-
 ## Usage
 
 ```python
