@@ -286,20 +286,17 @@ class FordAPI:
         res = self.post(self.url("services/webSetActiveVehiclePS"), params)
         return 'error' not in res.json()
 
-    def start_engine(self) -> None:
+    def _send_command(self, command_name: str) -> dict:
         """
-        Start the engine of the currently selected vehicle.
+        PRIVATE Send a command to the API.
 
-        Arguments:
-            None
-
-        Returns:
-            TODO
-
+        This is a central function call that handles a variety of vehicle
+        commands, such as engine on/off, lock/unlock, etc. You should try
+        to avoid calling this directly if at all possible!
         """
         params = {
             "PARAMS": {
-                "LOOKUPCODE": "START_CMD",
+                "LOOKUPCODE": command_name,
                 "SESSIONID": self._token,
                 "apiLevel": "2",
             }
@@ -312,28 +309,54 @@ class FordAPI:
             raise ValueError("Failure from server.", result)
         return result
 
-    def cancel_start_engine(self) -> None:
+    def start_engine(self) -> dict:
         """
         Start the engine of the currently selected vehicle.
 
         Arguments:
-            None
+            dict
 
         Returns:
             TODO
 
         """
-        params = {
-            "PARAMS": {
-                "LOOKUPCODE": "CANCEL_START_CMD",
-                "SESSIONID": self._token,
-                "apiLevel": "2",
-            }
-        }
-        res = self.post(self.url("services/webAddCommandPS"), params)
-        result = res.json()
-        if "error" in result:
-            raise ValueError("Authentication failed.", result["error"])
-        if "status" in result and "400" in result["status"]:
-            raise ValueError("Failure from server.", result)
-        return result
+        return self._send_command("START_CMD")
+
+    def cancel_start_engine(self) -> dict:
+        """
+        Start the engine of the currently selected vehicle.
+
+        Arguments:
+            dict
+
+        Returns:
+            TODO
+
+        """
+        return self._send_command("CANCEL_START_CMD")
+
+    def unlock(self) -> dict:
+        """
+        Start the engine of the currently selected vehicle.
+
+        Arguments:
+            dict
+
+        Returns:
+            TODO
+
+        """
+        return self._send_command("UNLOCK_CMD")
+
+    def lock(self) -> dict:
+        """
+        Start the engine of the currently selected vehicle.
+
+        Arguments:
+            dict
+
+        Returns:
+            TODO
+
+        """
+        return self._send_command("LOCK_CMD")
