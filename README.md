@@ -65,3 +65,14 @@ F.authenticate()
 ### High-level 'intent'-based API
 - [ ] "Turn on my car"
 - [ ] "Start/stop charging my car"
+
+## Hacking on this repo
+
+- Submit pull requests for individual features
+- Make sure things work locally before pushing
+
+- When pushing new changes to the function signatures or new documentation, re-generate the `Reference.md` file under /docs. You can use [`docshund`](https://github.com/FitMango/docshund) to do this, *thusly*:
+
+```shell
+docshund prefect/__init__.py > docs/Reference.md
+```

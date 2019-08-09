@@ -49,21 +49,43 @@ class Vehicle:
 
         """
         v = Vehicle(fordAPI=fordAPI)
-        v._data = data
-        v.location = (float(data["LATITUDE"]), float(data["LONGITUDE"]))
-        v.odometer = float(data["ODOMETER"])
-        v._ev_dte = data.get("ELECTRICDTE", 0)
-        v._fuel_dte = float(data.get("FUELDTE", 0))
-        v._dte = float(data.get("OVERALLDTE", 0))
-        v._vehicle_type = data["MODELNAME"]
-        v._vehicle_year = data["MODELYEAR"]
-        v.vin = data["vin"]
-        v.nickname = data["vehiclenickname"]
-        v._fuel_level = float(data["fuelLevel"])
-        v._state_of_charge = data.get("stateOfCharge")
-        v._charge_status = data.get("chargeStatus")
-        v._plug_status = data.get("plugStatus")
+        v._update_from_dict(data)
         return v
+
+    def _update_from_dict(self, data: dict) -> None:
+        self._data = data
+        self.location = (float(data["LATITUDE"]), float(data["LONGITUDE"]))
+        self.odometer = float(data["ODOMETER"])
+        self._ev_dte = data.get("ELECTRICDTE", 0)
+        self._fuel_dte = float(data.get("FUELDTE", 0))
+        self._dte = float(data.get("OVERALLDTE", 0))
+        self._vehicle_type = data["MODELNAME"]
+        self._vehicle_year = data["MODELYEAR"]
+        self.vin = data["vin"]
+        self.nickname = data["vehiclenickname"]
+        self._fuel_level = float(data["fuelLevel"])
+        self._state_of_charge = data.get("stateOfCharge")
+        self._charge_status = data.get("chargeStatus")
+        self._plug_status = data.get("plugStatus")
+
+    def update(self) -> None:
+        """
+        Update the Vehicle information from the server.
+
+        If you haven't made any other changes to the Vehicle object, these two
+        lines are equivalent:
+
+        >>> v = Vehicle.from_dict(v.get_status(), v._fordAPI)
+        >>> v.update()
+
+        Arguments:
+            None
+
+        Returns:
+            None
+
+        """
+        self._update_from_dict(self.get_status())
 
     def __repr__(self) -> str:
         """
