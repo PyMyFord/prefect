@@ -1,6 +1,6 @@
 """
 Main file for prefect Python library for interacting with the MyFordMobile API
-servers. These servers host a SOAP-style API that sometimes bhas a few REST-API
+servers. These servers host a SOAP-style API that sometimes has a few REST-API
 flavored artifacts.
 """
 
