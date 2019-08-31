@@ -3,6 +3,12 @@
 <h6 align=center>MyFordMobile reverse-engineered API in Python</h6>
 <h6 align=center><a href="https://sonarcloud.io/dashboard?id=PyMyFord_perfect"><img src="https://sonarcloud.io/api/project_badges/measure?project=PyMyFord_perfect&metric=alert_status" /></a></h6>
 
+## Installation
+
+```
+pip3 install -U ford-prefect
+```
+
 ## Usage
 
 ```python
@@ -56,10 +62,7 @@ F.authenticate()
 
 ## Roadmap
 
-- [x] Figure out JSON token authentication (is this a JWT?)
-- [ ] Full map of endpoints (check RE'd .apk?)
-- [x] `Vehicle` class to handle manipulation of individual vehicle object
-- [x] Config-file-based credentials for automatic authentication (if no args are passed to `authenticate` call)
+- [ ] Environment-variable based authentication
 
 
 ### High-level 'intent'-based API
@@ -76,3 +79,5 @@ F.authenticate()
 ```shell
 docshund prefect/__init__.py > docs/Reference.md
 ```
+
+Install docshund with `pip3 install -U docshund`.
