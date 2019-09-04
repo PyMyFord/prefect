@@ -36,7 +36,7 @@ print(my_car.status()) # metadata dictionary
 
 ## Authentication
 
-There are ~three~ (currently 2) ways to authenticate:
+There are three ways to authenticate:
 
 ### Plaintext username and password
 
@@ -45,7 +45,12 @@ You can pass credentials directly into the `authenticate` call:
 F.authenticate(USERNAME, PASSWORD)
 ```
 
+### Environment variables
+
+You can set `PREFECT_USERNAME` and `PREFECT_PASSWORD` environment variables. If these are set, pass nothing to the `FordAPI#authenticate` call and they will be automatically detected.
+
 ### Config file
+
 You can store credentials in a JSON config file, and pass the filename into the `authenticate` call:
 
 `~/.config/myfordmobile.json`
@@ -61,18 +66,12 @@ F.authenticate("~/.config/myfordmobile.json")
 ```
 
 Or, if you're using that filename (the default), you can omit it entirely:
+
 ```python
 F.authenticate()
 ```
 
-## Environment Variables
-
-> Not implemented.
-
-
-## Roadmap
-
-- [ ] Environment-variable based authentication
+If no arguments are passed to this constructor, environment variables (method 2) will be checked first before the config file is checked. If both techniques fail, and no username and password were provided, the `authenticate()` call will fail.
 
 
 ### High-level 'intent'-based API
