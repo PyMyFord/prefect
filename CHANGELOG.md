@@ -1,0 +1,3 @@
+- **[0.0.1](https://pypi.org/project/ford-prefect/0.0.1/) (August 28 2019)**
+    - Initial push to PyPI and PyMyFord GitHub Organization.
+    - Working `prefect.FordAPI` and `prefect.Vehicle` implementations
