@@ -1,8 +1,12 @@
 <p align=center><img align=center src='prefect.png' width=400 /></p>
 <h3 align=center>prefect</h3>
 <h6 align=center>MyFordMobile reverse-engineered API in Python</h6>
+
 <h6 align=center>
-    <a href="https://sonarcloud.io/dashboard?id=PyMyFord_perfect"><img alt="Sonar Quality Gate" src="https://img.shields.io/sonar/quality_gate/PyMyFord_perfect?server=https%3A%2F%2Fsonarcloud.io&style=for-the-badge"></a> 
+    <a href="https://sonarcloud.io/dashboard?id=PyMyFord_perfect"><img alt="Sonar Quality Gate" src="https://img.shields.io/sonar/quality_gate/PyMyFord_perfect?server=https%3A%2F%2Fsonarcloud.io&style=for-the-badge"></a>
+    <a href="#"><img alt="Travis (.org) branch" src="https://img.shields.io/travis/PyMyFord/prefect/master?label=BUILD%3AMASTER&style=for-the-badge" /></a>
+</h6>
+<h6 align=center>
     <a href="https://github.com/PyMyFord/prefect"><img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/PyMyFord/prefect?style=for-the-badge"></a>
     <a href="https://pypi.org/project/ford-prefect/"><img alt="PyPI" src="https://img.shields.io/pypi/v/ford-prefect?style=for-the-badge"></a>
     <a href="https://github.com/PyMyFord/prefect"><img alt="GitHub" src="https://img.shields.io/github/license/PyMyFord/prefect?style=for-the-badge"></a>
