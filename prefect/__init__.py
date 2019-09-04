@@ -21,7 +21,7 @@ class Vehicle:
     have authenticated with the FordAPI service.
     """
 
-    def __init__(self, fordAPI: 'FordAPI' = None) -> None:
+    def __init__(self, fordAPI: "FordAPI" = None) -> None:
         """
         Create a new Vehicle for data management.
 
@@ -37,7 +37,7 @@ class Vehicle:
         self._fordAPI = fordAPI
 
     @staticmethod
-    def from_dict(data: dict, fordAPI: 'FordAPI') -> 'Vehicle':
+    def from_dict(data: dict, fordAPI: "FordAPI") -> "Vehicle":
         """
         Create a new vehicle from a data dictionary returned by the Ford API.
 
@@ -183,11 +183,7 @@ class Vehicle:
             dict: A metadata dictionary with information about this vehicle.
 
         """
-        return [
-            v
-            for v in self._fordAPI.get_vehicles()
-            if v.vin == self.vin
-        ][0]._data
+        return [v for v in self._fordAPI.get_vehicles() if v.vin == self.vin][0]._data
 
 
 class FordAPI:
@@ -248,16 +244,19 @@ class FordAPI:
                 "Accept": "application/json, text/javascript, */*",
                 "Authorization": f"Bearer {_BEARER_TOKEN}",
             },
-            json=data
+            json=data,
         )
 
-    def authenticate(self, username: str = "~/.config/myfordmobile.json", password: str = None) -> None:
+    def authenticate(
+        self, username: str = "~/.config/myfordmobile.json", password: str = None
+    ) -> None:
         """
         Perform a server authentication.
 
-        TODO: This should be returning a token
-        TODO: Should also accept zero arguments, in which case a local config
-              file (~/.config/myfordmobile.json?) holds the credentials
+        This call also accepts zero arguments, in which case:
+        - Env varibles are checked first
+        - Then prefect checks a local config file
+            (~/.config/myfordmobile.json) for the credentials.
 
         Arguments:
             username (str): User's email
@@ -268,17 +267,21 @@ class FordAPI:
 
         """
         if password is None:
-            try:
-                with open(os.path.expanduser(username), 'r') as fh:
-                    config = json.load(fh)
-                    username = config['username']
-                    password = config['password']
-            except:
-                raise ValueError(
-                    "Failed to authenticate. You must provide a username and "
-                    "a password, or you can provide a path to a config file "
-                    "(~/.config/myfordmobile.json)."
-                )
+            if "PREFECT_USERNAME" in os.environ and "PREFECT_PASSWORD" in os.environ:
+                username = os.environ["PREFECT_USERNAME"]
+                password = os.environ["PREFECT_PASSWORD"]
+            else:
+                try:
+                    with open(os.path.expanduser(username), "r") as fh:
+                        config = json.load(fh)
+                        username = config["username"]
+                        password = config["password"]
+                except:
+                    raise ValueError(
+                        "Failed to authenticate. You must provide a username "
+                        "and a password, or you can provide a path to a config "
+                        "file (~/.config/myfordmobile.json)."
+                    )
         params = {
             "PARAMS": {
                 "emailaddress": username,
@@ -290,7 +293,7 @@ class FordAPI:
         res = self.post(self.url("services/webLoginPS"), params)
         self._token = res.json()["response"]["authToken"]
 
-    def get_vehicles(self) -> List['Vehicle']:
+    def get_vehicles(self) -> List["Vehicle"]:
         """
         Get a list of all registered vehicles for this account.
 
@@ -301,18 +304,13 @@ class FordAPI:
             List[dict]: A list of vehicles, in dict metadata form
 
         """
-        params = {
-            "PARAMS": {
-                "SESSIONID": self._token,
-                "apiLevel": "2",
-            }
-        }
+        params = {"PARAMS": {"SESSIONID": self._token, "apiLevel": "2"}}
         res = self.post(self.url("services/webRemoteEnergyReportPS"), params)
         if "response" not in res.json():
             raise ValueError("Failed to fetch results:", res.text)
         response = res.json()["response"]
         if isinstance(response, dict):
-            response = [response, ]
+            response = [response]
         return [Vehicle.from_dict(r, self) for r in response]
 
     def select_vehicle(self, vin: str) -> bool:
@@ -326,15 +324,9 @@ class FordAPI:
             bool: Whether the selection was successful
 
         """
-        params = {
-            "PARAMS": {
-                "VIN": vin,
-                "SESSIONID": self._token,
-                "apiLevel": "2",
-            }
-        }
+        params = {"PARAMS": {"VIN": vin, "SESSIONID": self._token, "apiLevel": "2"}}
         res = self.post(self.url("services/webSetActiveVehiclePS"), params)
-        return 'error' not in res.json()
+        return "error" not in res.json()
 
     def _send_command(self, command_name: str) -> dict:
         """

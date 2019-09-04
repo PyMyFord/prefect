@@ -22,7 +22,7 @@ def read(*parts):
 HERE = os.path.abspath(os.path.dirname(__file__))
 
 setup(
-    name="prefect",
+    name="ford-prefect",
     version=VERSION,
     author="Jordan Matelsky",
     author_email="opensource@matelsky.com",
