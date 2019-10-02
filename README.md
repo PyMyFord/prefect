@@ -13,6 +13,15 @@
     <img src="https://img.shields.io/badge/PRETTY%20DOPE-%F0%9F%A4%99-blue.svg?style=for-the-badge" />
 </h6>
 
+`prefect` is a Python library for interacting with your MyFordMobile-enabled vehicle. With `prefect`, you can:
+
+- Lock your car
+- Unlock your car
+- Check your gas level, and, if you have one, your EV battery level
+- Start your engine (e.g. to preheat your car in the Blustery Times Of Year), and stop your engine if you decide to stay home after all
+
+`prefect` uses a reverse-engineered API, and may be unstable. DON'T PANIC.
+
 ## Installation
 
 ```
@@ -73,10 +82,6 @@ F.authenticate()
 
 If no arguments are passed to this constructor, environment variables (method 2) will be checked first before the config file is checked. If both techniques fail, and no username and password were provided, the `authenticate()` call will fail.
 
-
-### High-level 'intent'-based API
-- [ ] "Turn on my car"
-- [ ] "Start/stop charging my car"
 
 ## Hacking on this repo
 
