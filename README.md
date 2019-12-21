@@ -22,6 +22,13 @@
 
 `prefect` uses a reverse-engineered API, and may be unstable. DON'T PANIC.
 
+## Examples
+
+| Example | Description |
+|---------|-------------|
+| [AWS Lambda](https://github.com/PyMyFord/example-prefect-lambda) | Start your car with `ford-prefect` from an AWS Lambda |
+| [🚧 HomeAssistant](https://github.com/PyMyFord/PrefectHA) | Start/stop, lock/unlock your car with [Home Assistant](https://www.home-assistant.io/hassio/) |
+
 ## Installation
 
 ```
