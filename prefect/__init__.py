@@ -291,7 +291,10 @@ class FordAPI:
             }
         }
         res = self.post(self.url("services/webLoginPS"), params)
-        self._token = res.json()["response"]["authToken"]
+        try:
+            self._token = res.json()["response"]["authToken"]
+        except Exception as e:
+            raise ValueError(f"Could not authenticate: {res.json()}") from e
 
     def get_vehicles(self) -> List["Vehicle"]:
         """
